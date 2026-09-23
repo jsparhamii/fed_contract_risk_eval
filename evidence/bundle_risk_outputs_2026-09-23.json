@@ -1,0 +1,30 @@
+{
+  "command": "databricks bundle run contract_risk_refresh -t dev --profile fe-bar --output json",
+  "run_url": "https://fevm-classic-stable-a5ppcn.cloud.databricks.com/jobs/1016189386000058/runs/222935546822280?o=7474650839269881",
+  "status": "2026-09-23 11:29:29 TERMINATED SUCCESS",
+  "task": "capture_build_evidence",
+  "result": {
+    "contract_count": 48,
+    "explanation_count": 24,
+    "negative_balances": 0,
+    "risk_table": "classic_stable_a5ppcn_catalog.dev_james_parham_fed_contract_risk.gold_contract_risk",
+    "risk_types": [
+      {"risk_type": "funding_exhaustion", "contracts": 12, "remaining_obligation": 3480000, "projected_shortfall": 15977950.06},
+      {"risk_type": "none", "contracts": 12, "remaining_obligation": 30600000, "projected_shortfall": 0.0},
+      {"risk_type": "underutilization", "contracts": 12, "remaining_obligation": 30600000, "projected_shortfall": 0.0},
+      {"risk_type": "watch", "contracts": 12, "remaining_obligation": 7320000, "projected_shortfall": 0.0}
+    ],
+    "explanation_samples": [
+      {
+        "contract_id": "SYN-0001",
+        "risk_type": "underutilization",
+        "explanation": "Contract SYN-0001 is in the review queue due to its risk type being underutilization, with a significant amount of remaining obligation dollars as of 2026-09-23. A human review of the funding plan is suggested to assess the contract's expenditure trends, including the recent monthly burn rate and projected spend to end, to ensure optimal utilization of the remaining $2,000,000 obligation."
+      },
+      {
+        "contract_id": "SYN-0002",
+        "risk_type": "underutilization",
+        "explanation": "Contract SYN-0002 is in the review queue due to its underutilization risk type, with a significant amount of remaining obligation dollars as it approaches expiration in 24 days. A human review of the funding plan is suggested to assess the contract's expenditure trends, including the recent monthly burn rate and projected spend, to ensure optimal use of the remaining obligated dollars."
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+bundle:
+  name: fed-contract-risk
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Existing Unity Catalog catalog for the prototype
+  schema:
+    default: fed_contract_risk
+    description: Dedicated schema in the selected catalog
+  snapshot_date:
+    default: '2026-09-23'
+    description: Deterministic as-of date for the synthetic input snapshot
+  warehouse_id:
+    default: 22865787590d430a
+    description: SQL warehouse for Genie and analytical app queries
+
+targets:
+  dev:
+    default: true
+    mode: development
+    variables:
+      catalog: classic_stable_a5ppcn_catalog

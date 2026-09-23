@@ -1,0 +1,20 @@
+Command: databricks bundle run contract_risk_refresh -t dev --profile fe-bar --output json
+Run URL: https://fevm-classic-stable-a5ppcn.cloud.databricks.com/jobs/1016189386000058/runs/391995418149082?o=7474650839269881
+2026-09-23 11:20:02 "[dev james_parham] fed-contract-risk-refresh-dev" RUNNING
+2026-09-23 11:22:37 "[dev james_parham] fed-contract-risk-refresh-dev" TERMINATED SUCCESS
+{
+  "task_outputs": [
+    {
+      "TaskKey": "explain_high_risk",
+      "Output": {},
+      "EndTime": 1790176950780
+    },
+    {
+      "TaskKey": "generate_landing_data",
+      "Output": {},
+      "EndTime": 1790176833369
+    }
+  ]
+}
+
+This run proves the three-task job completed. The bundle output does not include row counts or explanation text; those remain to be captured as separate text evidence.

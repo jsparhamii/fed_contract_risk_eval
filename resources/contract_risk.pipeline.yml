@@ -1,0 +1,15 @@
+resources:
+  pipelines:
+    contract_risk:
+      name: fed-contract-risk-${bundle.target}
+      catalog: ${var.catalog}
+      target: ${resources.schemas.risk_schema.name}
+      serverless: true
+      continuous: false
+      development: true
+      channel: current
+      configuration:
+        landing_root: /Volumes/${var.catalog}/${resources.schemas.risk_schema.name}/${resources.volumes.landing.name}
+      libraries:
+        - notebook:
+            path: ../src/lakeflow/contract_risk_pipeline.ipynb

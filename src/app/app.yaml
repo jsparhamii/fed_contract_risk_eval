@@ -1,0 +1,31 @@
+command:
+  - "python"
+  - "-m"
+  - "uvicorn"
+  - "app:app"
+  - "--host"
+  - "0.0.0.0"
+  - "--port"
+  - "8000"
+
+env:
+  # --- Analytical read path (SQL warehouse over governed Gold) ---
+  # In the dev target, development mode publishes into the prefixed schema.
+  - name: CATALOG
+    value: "classic_stable_a5ppcn_catalog"
+  - name: SCHEMA
+    value: "dev_james_parham_fed_contract_risk"
+  - name: GOLD_TABLE
+    value: "gold_contract_risk"
+  - name: EXPLANATIONS_TABLE
+    value: "gold_risk_explanations"
+  - name: WAREHOUSE_ID
+    value: "22865787590d430a"
+
+  # --- Operational write path (Lakebase action queue) ---
+  # PGHOST / PGUSER / PGPORT / PGDATABASE are auto-injected when a Database app
+  # resource is attached in the app UI. ENDPOINT_NAME must still be set to the
+  # deployed Lakebase endpoint once the Postgres project has a branch/endpoint.
+  # Until then the cockpit runs read-only and reports Lakebase as unavailable.
+  - name: ENDPOINT_NAME
+    value: "projects/fed-contract-risk-eval/branches/production/endpoints/primary"

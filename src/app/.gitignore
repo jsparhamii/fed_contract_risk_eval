@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+
+# Node — keep frontend/dist for deployment, exclude everything else heavy
+frontend/node_modules/
+frontend/.vite/
+npm-debug.log*
+
+# tsc -b build byproducts (composite project emit)
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
+# Databricks
+.databricks/

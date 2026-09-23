@@ -1,0 +1,8 @@
+resources:
+  genie_spaces:
+    contract_risk_agent:
+      title: Federal Contract Risk Analyst
+      description: Natural-language exploration of governed synthetic contract risk snapshots
+      parent_path: ${workspace.root_path}
+      warehouse_id: ${var.warehouse_id}
+      file_path: ../genie/contract_risk.geniespace.json

@@ -1,0 +1,15 @@
+resources:
+  schemas:
+    risk_schema:
+      catalog_name: ${var.catalog}
+      name: ${var.schema}
+      comment: Governed synthetic federal contract risk prototype
+      grants:
+        # Least-privilege read access for the cockpit app's service principal.
+        # It queries Gold + explanations through the warehouse and never writes
+        # to Unity Catalog (operational writes go to Lakebase). USE_CATALOG on the
+        # pre-existing catalog is granted separately (the bundle does not manage it).
+        - principal: 9956fc8b-c860-4bfd-86ef-53c1ac72cefb # app-ok6ug3 fed-contract-risk-cockpit-dev SP
+          privileges:
+            - USE_SCHEMA
+            - SELECT

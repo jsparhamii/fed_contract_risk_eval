@@ -1,0 +1,8 @@
+resources:
+  volumes:
+    landing:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.risk_schema.name}
+      name: landing
+      volume_type: MANAGED
+      comment: Synthetic award and expenditure landing files for the contract risk prototype

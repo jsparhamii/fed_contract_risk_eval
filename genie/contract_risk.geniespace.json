@@ -1,0 +1,81 @@
+{
+  "version": 2,
+  "config": {
+    "sample_questions": [
+      {
+        "id": "10000000000000000000000000000001",
+        "question": [
+          "What should I review this week?"
+        ]
+      },
+      {
+        "id": "10000000000000000000000000000002",
+        "question": [
+          "Which contracts expire within 60 days with more than $1 million remaining?"
+        ]
+      },
+      {
+        "id": "10000000000000000000000000000003",
+        "question": [
+          "Which contracts may exhaust obligated funding before expiration?"
+        ]
+      }
+    ]
+  },
+  "data_sources": {
+    "tables": [
+      {
+        "identifier": "classic_stable_a5ppcn_catalog.dev_james_parham_fed_contract_risk.gold_contract_risk"
+      }
+    ]
+  },
+  "instructions": {
+    "example_question_sqls": [
+      {
+        "id": "20000000000000000000000000000001",
+        "question": [
+          "What should I review this week?"
+        ],
+        "sql": [
+          "SELECT contract_id, agency, vendor, end_date, remaining_obligation, projected_shortfall, risk_type, risk_priority_score FROM `classic_stable_a5ppcn_catalog`.`dev_james_parham_fed_contract_risk`.`gold_contract_risk` ",
+          "WHERE as_of_date = (SELECT MAX(as_of_date) FROM `classic_stable_a5ppcn_catalog`.`dev_james_parham_fed_contract_risk`.`gold_contract_risk`) AND risk_level = 'HIGH' ",
+          "ORDER BY risk_priority_score DESC, end_date, contract_id LIMIT 20"
+        ]
+      },
+      {
+        "id": "20000000000000000000000000000002",
+        "question": [
+          "Which contracts expire within 60 days with more than $1 million remaining?"
+        ],
+        "sql": [
+          "SELECT contract_id, agency, end_date, remaining_obligation, risk_type FROM `classic_stable_a5ppcn_catalog`.`dev_james_parham_fed_contract_risk`.`gold_contract_risk` ",
+          "WHERE as_of_date = (SELECT MAX(as_of_date) FROM `classic_stable_a5ppcn_catalog`.`dev_james_parham_fed_contract_risk`.`gold_contract_risk`) AND days_to_expiration BETWEEN 0 AND 60 AND remaining_obligation > 1000000 ",
+          "ORDER BY end_date, remaining_obligation DESC"
+        ]
+      },
+      {
+        "id": "20000000000000000000000000000003",
+        "question": [
+          "Which contracts may exhaust obligated funding before expiration?"
+        ],
+        "sql": [
+          "SELECT contract_id, agency, end_date, remaining_obligation, monthly_burn, projected_shortfall FROM `classic_stable_a5ppcn_catalog`.`dev_james_parham_fed_contract_risk`.`gold_contract_risk` ",
+          "WHERE as_of_date = (SELECT MAX(as_of_date) FROM `classic_stable_a5ppcn_catalog`.`dev_james_parham_fed_contract_risk`.`gold_contract_risk`) AND risk_type = 'funding_exhaustion' ",
+          "ORDER BY projected_shortfall DESC, contract_id"
+        ]
+      }
+    ],
+    "text_instructions": [
+      {
+        "id": "30000000000000000000000000000001",
+        "content": [
+          "This agent answers analytical questions about a fully synthetic federal contract snapshot. Use only the Gold contract risk table. ",
+          "Unless the user names a date, filter to the maximum as_of_date in that table. 'This week' means the latest snapshot's HIGH priority queue. ",
+          "remaining_obligation equals obligated_amount minus synthetic expenditures. Monthly burn averages the three completed months before the snapshot. ",
+          "The priority score is a deterministic review ordering, not a probability, legal finding, or recommended contract action. ",
+          "Never imply these are real USAspending, SAM, or GSA records. Assignment, notes, and review status live in Lakebase and are not available here."
+        ]
+      }
+    ]
+  }
+}

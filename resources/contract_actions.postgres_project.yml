@@ -1,0 +1,9 @@
+resources:
+  postgres_projects:
+    contract_actions:
+      project_id: fed-contract-risk-eval
+      display_name: Federal Contract Risk Action Queue
+      default_endpoint_settings:
+        autoscaling_limit_min_cu: 0.5
+        autoscaling_limit_max_cu: 2
+        suspend_timeout_duration: 300s

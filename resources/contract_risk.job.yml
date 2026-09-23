@@ -1,0 +1,34 @@
+resources:
+  jobs:
+    contract_risk_refresh:
+      name: fed-contract-risk-refresh-${bundle.target}
+      tasks:
+        - task_key: generate_landing_data
+          notebook_task:
+            notebook_path: ../src/data_generation/generate_contract_data.ipynb
+            base_parameters:
+              catalog: ${resources.schemas.risk_schema.catalog_name}
+              schema: ${resources.schemas.risk_schema.name}
+              volume: ${resources.volumes.landing.name}
+              as_of_date: ${var.snapshot_date}
+        - task_key: ingest_and_score
+          depends_on:
+            - task_key: generate_landing_data
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.contract_risk.id}
+        - task_key: explain_high_risk
+          depends_on:
+            - task_key: ingest_and_score
+          notebook_task:
+            notebook_path: ../src/ai/generate_explanations.ipynb
+            base_parameters:
+              catalog: ${resources.schemas.risk_schema.catalog_name}
+              schema: ${resources.schemas.risk_schema.name}
+        - task_key: capture_build_evidence
+          depends_on:
+            - task_key: explain_high_risk
+          notebook_task:
+            notebook_path: ../src/validation/verify_build.ipynb
+            base_parameters:
+              catalog: ${resources.schemas.risk_schema.catalog_name}
+              schema: ${resources.schemas.risk_schema.name}

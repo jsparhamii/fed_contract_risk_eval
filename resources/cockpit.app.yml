@@ -1,0 +1,21 @@
+resources:
+  apps:
+    cockpit:
+      name: fed-contract-risk-cockpit-${bundle.target}
+      description: Acquisition Risk Cockpit — review queue over governed Gold with a Lakebase action queue
+      source_code_path: ../src/app
+      resources:
+        # Analytical reads: the app queries Gold through this SQL warehouse.
+        - name: warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        # Operational writes: the Lakebase autoscaling project's production branch.
+        # Attaching it provisions the app SP's Postgres role and injects the PG*
+        # connection env vars at runtime; the app then uses ENDPOINT_NAME (set in
+        # app.yaml) to mint per-connection OAuth database credentials.
+        - name: lakebase
+          postgres:
+            branch: projects/fed-contract-risk-eval/branches/production
+            database: projects/fed-contract-risk-eval/branches/production/databases/databricks-postgres
+            permission: CAN_CONNECT_AND_CREATE
