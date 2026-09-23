@@ -1,0 +1,630 @@
+<title>Acquisition Risk Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@600;700;800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef1f5;
+    --ink: #111a2b;
+    --muted: #5a6676;
+    --faint: #8a95a5;
+    --hairline: #e2e6ec;
+    --accent: #1f5aa6;
+    --accent-soft: #e7eef7;
+    --critical: #b3311f;
+    --critical-soft: #f7e7e4;
+    --warning: #9a6410;
+    --warning-soft: #f6eddc;
+    --good: #2f7d4f;
+    --good-soft: #e4f0e9;
+    --shadow: 0 1px 2px rgba(17,26,43,.05), 0 8px 30px rgba(17,26,43,.06);
+
+    --display: "Libre Franklin", "Public Sans", system-ui, sans-serif;
+    --body: "Public Sans", system-ui, -apple-system, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+  :root:not([data-theme="light"]) {
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c1420;
+      --surface: #141f30;
+      --surface-2: #1b2840;
+      --ink: #e8edf3;
+      --muted: #9aa8bb;
+      --faint: #6b7a8f;
+      --hairline: #26364b;
+      --accent: #5b9be0;
+      --accent-soft: #16273e;
+      --critical: #e8836f;
+      --critical-soft: #2e1a17;
+      --warning: #d6a24e;
+      --warning-soft: #2c2413;
+      --good: #6fc191;
+      --good-soft: #142519;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.34);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1420;
+    --surface: #141f30;
+    --surface-2: #1b2840;
+    --ink: #e8edf3;
+    --muted: #9aa8bb;
+    --faint: #6b7a8f;
+    --hairline: #26364b;
+    --accent: #5b9be0;
+    --accent-soft: #16273e;
+    --critical: #e8836f;
+    --critical-soft: #2e1a17;
+    --warning: #d6a24e;
+    --warning-soft: #2c2413;
+    --good: #6fc191;
+    --good-soft: #142519;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 34px rgba(0,0,0,.34);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px clamp(16px, 4vw, 40px);
+    border-bottom: 1px solid var(--hairline);
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .brand .dot {
+    width: 9px; height: 9px; border-radius: 2px;
+    background: var(--accent);
+  }
+  .topbar .spacer { flex: 1; }
+  .toggle {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--hairline);
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .toggle:hover { color: var(--ink); border-color: var(--accent); }
+
+  /* ---- Deck ---- */
+  .deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(24px, 5vw, 72px);
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity .42s ease, transform .42s ease;
+    pointer-events: none;
+    overflow-y: auto;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  .inner {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 20px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 6vw, 4.6rem);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -.015em;
+    text-wrap: balance;
+    margin: 0 0 28px;
+  }
+  .lead {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(1.5rem, 3vw, 2.3rem);
+    line-height: 1.22;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  p { margin: 0; }
+  .sub { color: var(--muted); font-size: clamp(1.05rem, 1.6vw, 1.3rem); line-height: 1.5; }
+  .fine { font-size: .85rem; color: var(--faint); }
+  .mono-note { font-family: var(--mono); font-size: .8rem; letter-spacing: .04em; color: var(--faint); }
+
+  .cover-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    margin-top: 34px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: .04em;
+    color: var(--muted);
+  }
+  .rule {
+    height: 3px; width: 64px; border-radius: 2px;
+    background: var(--accent);
+    margin: 28px 0;
+  }
+
+  /* ---- KPI tiles ---- */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin: 8px 0 26px;
+  }
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 14px;
+    padding: 20px 18px;
+    box-shadow: var(--shadow);
+  }
+  .kpi .num {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(1.9rem, 3.4vw, 2.9rem);
+    line-height: 1;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi .lab { margin-top: 10px; font-size: .82rem; color: var(--muted); line-height: 1.35; }
+  .kpi.accent .num { color: var(--accent); }
+  .kpi.crit .num { color: var(--critical); }
+
+  /* ---- Two-column concept cards ---- */
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 6px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: var(--shadow);
+  }
+  .card .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .tag.crit { color: var(--critical); background: var(--critical-soft); }
+  .card h3 { font-family: var(--display); font-weight: 700; font-size: 1.35rem; margin: 0 0 8px; letter-spacing: -.01em; }
+  .card p { color: var(--muted); font-size: 1rem; }
+
+  /* ---- Review group rows ---- */
+  .groups { display: flex; flex-direction: column; gap: 10px; }
+  .grow {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 14px 18px;
+  }
+  .grow .stripe { width: 6px; height: 100%; min-height: 30px; border-radius: 3px; }
+  .grow .name { font-weight: 600; }
+  .grow .name span { display: block; color: var(--muted); font-weight: 400; font-size: .85rem; margin-top: 2px; }
+  .grow .stake { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .grow .stake b { font-size: 1.15rem; }
+  .grow .stake span { display: block; color: var(--faint); font-size: .78rem; }
+  .s-crit { background: var(--critical); } .s-crit-t { color: var(--critical); }
+  .s-warn { background: var(--warning); } .s-warn-t { color: var(--warning); }
+  .s-good { background: var(--good); } .s-good-t { color: var(--good); }
+
+  /* ---- Pipeline flow ---- */
+  .flow { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 26px; }
+  .step {
+    flex: 1 1 150px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 16px 16px;
+    position: relative;
+  }
+  .step .n { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .1em; }
+  .step .t { font-family: var(--display); font-weight: 700; font-size: 1.02rem; margin-top: 6px; letter-spacing: -.01em; }
+  .step .d { font-size: .82rem; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+  .tagline {
+    font-family: var(--display); font-weight: 700;
+    font-size: clamp(1.3rem, 2.4vw, 1.8rem); letter-spacing: -.01em;
+    text-align: center;
+  }
+  .tagline em { font-style: normal; color: var(--accent); }
+
+  /* ---- Numbered beats ---- */
+  .beats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .beat { display: flex; gap: 16px; align-items: flex-start; background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .beat .idx { font-family: var(--display); font-weight: 800; font-size: 1.7rem; color: var(--accent); line-height: 1; font-variant-numeric: tabular-nums; }
+  .beat h3 { font-family: var(--display); font-weight: 700; margin: 0 0 4px; font-size: 1.15rem; letter-spacing: -.01em; }
+  .beat p { color: var(--muted); font-size: .95rem; }
+
+  /* ---- Value lists ---- */
+  .vlist { display: flex; flex-direction: column; gap: 16px; margin-top: 4px; }
+  .vitem { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: baseline; }
+  .vitem .k { font-family: var(--display); font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; }
+  .vitem .v { color: var(--muted); }
+  .kpiline {
+    margin-top: 26px; padding: 16px 20px; border-radius: 12px;
+    background: var(--accent-soft); border: 1px solid var(--hairline);
+    font-size: .95rem;
+  }
+  .kpiline b { color: var(--accent); }
+
+  .checks { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+  .chk { display: grid; grid-template-columns: 26px 1fr; gap: 14px; align-items: start; }
+  .chk .m { color: var(--accent); font-weight: 700; }
+  .chk .x { }
+  .chk .x b { font-family: var(--display); }
+  .chk .x span { color: var(--muted); }
+
+  .steps-num { display: flex; flex-direction: column; gap: 14px; counter-reset: s; }
+  .snum { display: grid; grid-template-columns: 34px 1fr; gap: 16px; align-items: baseline; }
+  .snum .b { font-family: var(--mono); color: var(--accent); font-size: 1.05rem; }
+  .snum .t b { font-family: var(--display); }
+  .snum .t span { color: var(--muted); }
+
+  /* ---- Handoff ---- */
+  .handoff { text-align: center; }
+  .handoff .pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 13px; letter-spacing: .06em;
+    color: var(--accent); background: var(--accent-soft);
+    border: 1px solid var(--hairline); border-radius: 999px;
+    padding: 10px 18px; margin-top: 26px;
+  }
+  .handoff .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); }
+
+  /* ---- Controls ---- */
+  .controls {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px clamp(16px, 4vw, 40px);
+    border-top: 1px solid var(--hairline);
+    background: var(--surface);
+  }
+  .nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .nav:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav:disabled { opacity: .35; cursor: default; }
+  .counter { font-family: var(--mono); font-size: 13px; letter-spacing: .08em; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .progress { flex: 1; height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+  .progress .fill { height: 100%; width: 0; background: var(--accent); border-radius: 4px; transition: width .42s ease; }
+  .hint { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--faint); }
+
+  @media (max-width: 720px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .cols, .beats { grid-template-columns: 1fr; }
+    .grow { grid-template-columns: 6px 1fr; }
+    .grow .stake { grid-column: 2; text-align: left; margin-top: 6px; }
+    .hint { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: none; }
+    .progress .fill { transition: none; }
+  }
+</style>
+
+<header class="topbar">
+  <span class="brand"><span class="dot"></span> Acquisition Risk Cockpit</span>
+  <span class="spacer"></span>
+  <span class="mono-note">Federal acquisition · synthetic prototype</span>
+  <button class="toggle" id="themeToggle" type="button">Theme</button>
+</header>
+
+<main class="deck" id="deck">
+
+  <!-- 1. Cover -->
+  <section class="slide active">
+    <div class="inner">
+      <p class="eyebrow">Acquisition risk · review-priority prototype</p>
+      <h1>Find the contracts that need a funding review — before they expire.</h1>
+      <div class="rule"></div>
+      <p class="sub">A prioritized, explained review queue for a federal acquisition team: from governed data to a natural-language interface to an operational cockpit where a manager acts.</p>
+      <div class="cover-meta">
+        <span>Snapshot · 2026-09-23</span>
+        <span>48 synthetic contracts</span>
+        <span>Fully synthetic data</span>
+      </div>
+      <p class="fine" style="margin-top:22px">The score is a transparent review priority — not a risk probability or legal determination. A person makes every contracting decision.</p>
+    </div>
+  </section>
+
+  <!-- 2. Outcome -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">The business outcome</p>
+      <p class="lead">Reduce the manual effort to find the contracts that need financial or administrative attention before they expire — and shorten the time from <em style="color:var(--accent);font-style:normal">flagged</em> to <em style="color:var(--accent);font-style:normal">assigned for review</em>.</p>
+      <div class="rule"></div>
+      <p class="sub">A governed pipeline, an explained review queue, a natural-language interface, and an operational cockpit — every component serves this one outcome.</p>
+    </div>
+  </section>
+
+  <!-- 3. The decision -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">The Monday-morning decision</p>
+      <h2>Two funding patterns quietly create risk.</h2>
+      <div class="cols">
+        <div class="card">
+          <span class="tag crit">Underutilization</span>
+          <h3>Money left on the table</h3>
+          <p>A contract nears expiration with substantial obligated funds still unspent.</p>
+        </div>
+        <div class="card">
+          <span class="tag crit">Funding exhaustion</span>
+          <h3>Running out early</h3>
+          <p>Recent spending pace will exhaust the remaining obligation before the period of performance ends.</p>
+        </div>
+      </div>
+      <p class="sub" style="margin-top:24px">Today, answering <em>“which contracts do I look at this week?”</em> means stitching together awards, obligations, dates, and spend trends by hand — for every contract, every week.</p>
+    </div>
+  </section>
+
+  <!-- 4. Snapshot -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">This snapshot · 48 contracts</p>
+      <div class="kpis">
+        <div class="kpi crit"><div class="num">24</div><div class="lab">High priority for review</div></div>
+        <div class="kpi accent"><div class="num">$30.6M</div><div class="lab">Obligated funds that may go unspent</div></div>
+        <div class="kpi crit"><div class="num">~$16M</div><div class="lab">Projected funding shortfall before expiration</div></div>
+        <div class="kpi accent"><div class="num">50%</div><div class="lab">Of the portfolio flagged this week</div></div>
+      </div>
+      <div class="groups">
+        <div class="grow"><div class="stripe s-crit"></div><div class="name s-crit-t">Possible funding exhaustion <span>12 contracts · spending will outrun the balance</span></div><div class="stake"><b>~$15.98M</b><span>projected shortfall</span></div></div>
+        <div class="grow"><div class="stripe s-crit"></div><div class="name s-crit-t">Possible underutilization <span>12 contracts · funds may expire unspent</span></div><div class="stake"><b>$30.60M</b><span>remaining obligations</span></div></div>
+        <div class="grow"><div class="stripe s-warn"></div><div class="name s-warn-t">Watch <span>12 contracts · approaching expiration</span></div><div class="stake"><b>Monitor</b><span>no high-priority rule</span></div></div>
+        <div class="grow"><div class="stripe s-good"></div><div class="name s-good-t">Routine <span>12 contracts</span></div><div class="stake"><b>Clear</b><span>no rule triggered</span></div></div>
+      </div>
+      <p class="fine" style="margin-top:18px">Amounts are triage signals over synthetic records — not measured savings, losses, or a recommendation to deobligate funds.</p>
+    </div>
+  </section>
+
+  <!-- 5. Workflow -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">One workflow — from raw data to action</p>
+      <div class="flow">
+        <div class="step"><div class="n">01</div><div class="t">Lakeflow</div><div class="d">Ingest & validate synthetic files</div></div>
+        <div class="step"><div class="n">02</div><div class="t">Unity Catalog</div><div class="d">Govern, grant, trace lineage</div></div>
+        <div class="step"><div class="n">03</div><div class="t">Risk signals</div><div class="d">Transparent rules — not a black box</div></div>
+        <div class="step"><div class="n">04</div><div class="t">GenAI brief</div><div class="d">Grounded in the contract’s own facts</div></div>
+        <div class="step"><div class="n">05</div><div class="t">Genie</div><div class="d">Ask questions in plain language</div></div>
+        <div class="step"><div class="n">06</div><div class="t">Lakebase</div><div class="d">Owner · status · notes · next action</div></div>
+        <div class="step"><div class="n">07</div><div class="t">Cockpit app</div><div class="d">The manager’s one screen</div></div>
+      </div>
+      <p class="tagline"><em>Analytics</em> determines the priority. <em>AI</em> explains it. <em>A person</em> decides.</p>
+    </div>
+  </section>
+
+  <!-- 6. Demo beats -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">The demo · four beats</p>
+      <h2>What we’ll walk through.</h2>
+      <div class="beats">
+        <div class="beat"><div class="idx">1</div><div><h3>Overview</h3><p>“24 of my 48 contracts are high priority; $30.6M may go unspent, ~$16M may fall short.”</p></div></div>
+        <div class="beat"><div class="idx">2</div><div><h3>Open the top item</h3><p>Obligation, remaining balance, burn, days to expiration — and a plain-language brief of <em>why</em>.</p></div></div>
+        <div class="beat"><div class="idx">3</div><div><h3>Ask Genie</h3><p>“Which contracts expire within 60 days with more than $1M remaining?” → 11 contracts, with SQL and rows.</p></div></div>
+        <div class="beat"><div class="idx">4</div><div><h3>Assign it</h3><p>Set owner, status, and a note — it persists and appears in the queue’s Stage column.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Value: sponsor -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">Value · executive sponsor</p>
+      <h2>The person who funds the decision.</h2>
+      <div class="vlist">
+        <div class="vitem"><div class="k">Portfolio visibility</div><div class="v">How many contracts merit attention this snapshot, and the dollars in each review category.</div></div>
+        <div class="vitem"><div class="k">Throughput</div><div class="v">Are reviews assigned and closed <em>before</em> expiration — not after.</div></div>
+        <div class="vitem"><div class="k">Governance</div><div class="v">Data governed centrally; the app exposes only what acquisition users need, with least-privilege access and full lineage.</div></div>
+      </div>
+      <p class="kpiline">Pilot KPIs: <b>share reviewed before expiration</b> · <b>median time from flag → assignment</b> · <b>staff hours on the weekly queue</b>.</p>
+    </div>
+  </section>
+
+  <!-- 8. Value: manager -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">Value · acquisition manager</p>
+      <h2>The domain owner who lives in the tool.</h2>
+      <div class="vlist">
+        <div class="vitem"><div class="k">A ranked queue</div><div class="v">Starts with prioritized work, not a blank spreadsheet.</div></div>
+        <div class="vitem"><div class="k">The “why”</div><div class="v">Exact dates, balances, burn, and the rule that fired — a defensible flag.</div></div>
+        <div class="vitem"><div class="k">Ownership</div><div class="v">Records who owns the next step; filters by stage to return to in-progress work.</div></div>
+        <div class="vitem"><div class="k">Plain language</div><div class="v">Asks questions of the data without writing SQL.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. Responsible AI -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">Why this is a responsible use of AI</p>
+      <div class="checks">
+        <div class="chk"><div class="m">01</div><div class="x"><b>Deterministic rules set the priority.</b> <span>Transparent thresholds on dates, remaining obligation, and projected spend — no mysterious probability.</span></div></div>
+        <div class="chk"><div class="m">02</div><div class="x"><b>AI only explains.</b> <span>The brief restates the contract’s own figures; it never asserts fraud, noncompliance, or that funds should be deobligated.</span></div></div>
+        <div class="chk"><div class="m">03</div><div class="x"><b>Governed and synthetic.</b> <span>One Unity Catalog schema, table lineage, least-privilege grants; every record is generated, not sourced from USAspending, SAM, or GSA.</span></div></div>
+        <div class="chk"><div class="m">04</div><div class="x"><b>Human in the loop.</b> <span>A high-priority item means <em>review the funding plan</em> — not act automatically.</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Next step -->
+  <section class="slide">
+    <div class="inner">
+      <p class="eyebrow">Responsible next step</p>
+      <h2>The prototype establishes the workflow.</h2>
+      <div class="steps-num">
+        <div class="snum"><div class="b">01</div><div class="t"><b>Validate the definitions</b> <span>— obligation vs. expenditure, the burn window — with finance and contracting staff.</span></div></div>
+        <div class="snum"><div class="b">02</div><div class="t"><b>Connect an authorized expenditure feed</b> <span>in place of the synthetic ledger.</span></div></div>
+        <div class="snum"><div class="b">03</div><div class="t"><b>Tune the thresholds</b> <span>against historical review outcomes.</span></div></div>
+        <div class="snum"><div class="b">04</div><div class="t"><b>Run a time-boxed pilot</b> <span>and measure the KPIs.</span></div></div>
+      </div>
+      <p class="fine" style="margin-top:22px">Keep human approval for any funding or contract action. Any time-savings figure is an estimate until measured against a baseline.</p>
+    </div>
+  </section>
+
+  <!-- 11. Handoff -->
+  <section class="slide">
+    <div class="inner handoff">
+      <p class="eyebrow" style="text-align:center">Live demo</p>
+      <h1>Let’s open the cockpit.</h1>
+      <p class="sub" style="margin-top:20px">It’s Monday morning. I’m an acquisition manager with 48 contracts — and I need to know which ones require my attention.</p>
+      <span class="pill"><span class="dot"></span> Switching to the live Acquisition Risk Cockpit</span>
+    </div>
+  </section>
+
+</main>
+
+<footer class="controls">
+  <button class="nav" id="prev" type="button" aria-label="Previous slide">‹</button>
+  <button class="nav" id="next" type="button" aria-label="Next slide">›</button>
+  <span class="counter" id="counter">01 / 11</span>
+  <div class="progress"><div class="fill" id="fill"></div></div>
+  <span class="hint">← → to navigate</span>
+</footer>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const counter = document.getElementById('counter');
+  const fill = document.getElementById('fill');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+  const deck = document.getElementById('deck');
+  let i = 0;
+
+  const pad = n => String(n).padStart(2, '0');
+
+  function show(n) {
+    i = Math.max(0, Math.min(total - 1, n));
+    slides.forEach((s, k) => s.classList.toggle('active', k === i));
+    counter.textContent = pad(i + 1) + ' / ' + pad(total);
+    fill.style.width = ((i + 1) / total * 100) + '%';
+    prev.disabled = i === 0;
+    next.disabled = i === total - 1;
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    deck.scrollTop = 0;
+  }
+
+  next.addEventListener('click', () => show(i + 1));
+  prev.addEventListener('click', () => show(i - 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(i - 1); }
+    else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(total - 1); }
+  });
+
+  // Theme toggle (per-viewer convenience)
+  const root = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  function currentTheme() {
+    return root.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+  try {
+    const saved = localStorage.getItem('deck-theme');
+    if (saved) root.setAttribute('data-theme', saved);
+  } catch (e) {}
+  toggle.addEventListener('click', () => {
+    const nextTheme = currentTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', nextTheme);
+    try { localStorage.setItem('deck-theme', nextTheme); } catch (e) {}
+  });
+
+  // Deep-link to a slide via hash
+  const start = parseInt((location.hash || '').replace('#', ''), 10);
+  show(Number.isFinite(start) && start >= 1 ? start - 1 : 0);
+</script>
