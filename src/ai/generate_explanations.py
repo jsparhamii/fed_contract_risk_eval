@@ -1,5 +1,14 @@
 # Databricks notebook source
-"""Persist grounded GenAI explanations for the latest high-priority snapshot."""
+"""Persist grounded GenAI explanations for the latest high-priority snapshot.
+
+Intelligence layer: this is the AI construct. It calls the Databricks ``ai_gen``
+SQL AI function (Foundation Models) to turn each HIGH-priority contract's own
+governed facts into a two-sentence review brief. Analytics (the gold table)
+determines the priority; ai_gen only explains it. The same query is mirrored,
+runnable, in ../../sql/generate_explanations.sql; the committed output is in
+evidence/bundle_risk_outputs_2026-09-23.json and is grounding-checked in
+evidence/ai_explanation_grounding_2026-09-23.md.
+"""
 
 dbutils.widgets.text("catalog", "")
 dbutils.widgets.text("schema", "fed_contract_risk")
