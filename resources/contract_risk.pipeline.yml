@@ -12,4 +12,4 @@ resources:
         landing_root: /Volumes/${var.catalog}/${resources.schemas.risk_schema.name}/${resources.volumes.landing.name}
       libraries:
         - notebook:
-            path: ../src/lakeflow/contract_risk_pipeline.ipynb
+            path: ../src/lakeflow/contract_risk_pipeline.py

@@ -1,6 +1,6 @@
 # AI explanation grounding check (success criterion 4)
 
-The explanation job (`src/ai/generate_explanations.ipynb`) calls `ai_gen` with a prompt that
+The explanation job (`src/ai/generate_explanations.py`) calls `ai_gen` with a prompt that
 passes only the contract's own Gold facts and forbids inventing causes or numbers or asserting
 fraud, noncompliance, or a deobligation requirement. This note verifies the two committed
 explanations cite **only supplied facts**.

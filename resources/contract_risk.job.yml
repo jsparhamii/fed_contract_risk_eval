@@ -5,7 +5,7 @@ resources:
       tasks:
         - task_key: generate_landing_data
           notebook_task:
-            notebook_path: ../src/data_generation/generate_contract_data.ipynb
+            notebook_path: ../src/data_generation/generate_contract_data.py
             base_parameters:
               catalog: ${resources.schemas.risk_schema.catalog_name}
               schema: ${resources.schemas.risk_schema.name}
@@ -20,7 +20,7 @@ resources:
           depends_on:
             - task_key: ingest_and_score
           notebook_task:
-            notebook_path: ../src/ai/generate_explanations.ipynb
+            notebook_path: ../src/ai/generate_explanations.py
             base_parameters:
               catalog: ${resources.schemas.risk_schema.catalog_name}
               schema: ${resources.schemas.risk_schema.name}
@@ -28,7 +28,7 @@ resources:
           depends_on:
             - task_key: explain_high_risk
           notebook_task:
-            notebook_path: ../src/validation/verify_build.ipynb
+            notebook_path: ../src/validation/verify_build.py
             base_parameters:
               catalog: ${resources.schemas.risk_schema.catalog_name}
               schema: ${resources.schemas.risk_schema.name}

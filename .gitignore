@@ -3,3 +3,6 @@ __pycache__/
 .databricks/
 .env
 .venv/
+
+# macOS
+.DS_Store

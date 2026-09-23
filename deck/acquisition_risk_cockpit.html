@@ -389,6 +389,31 @@
     .slide { transition: none; }
     .progress .fill { transition: none; }
   }
+
+  /* Print / PDF: lay out every slide as a full 16:9 landscape page (light palette). */
+  @media print {
+    :root {
+      --bg:#fff; --surface:#fff; --surface-2:#eef1f5; --ink:#111a2b; --muted:#5a6676; --faint:#8a95a5;
+      --hairline:#e2e6ec; --accent:#1f5aa6; --accent-soft:#e7eef7;
+      --critical:#b3311f; --critical-soft:#f7e7e4; --warning:#9a6410; --warning-soft:#f6eddc;
+      --good:#2f7d4f; --good-soft:#e4f0e9;
+    }
+    @page { size: 13.333in 7.5in; margin: 0; }
+    html, body { height: auto; overflow: visible; background: #fff; }
+    body { display: block; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .controls { display: none !important; }
+    .deck { position: static; height: auto; overflow: visible; }
+    .slide {
+      position: static; inset: auto;
+      opacity: 1 !important; transform: none !important;
+      display: flex !important;
+      width: 13.333in; height: 7.5in;
+      overflow: hidden;
+      break-after: page; page-break-after: always;
+    }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+    .kpi, .card, .beat, .grow, .step { box-shadow: none; }
+  }
 </style>
 
 <header class="topbar">
